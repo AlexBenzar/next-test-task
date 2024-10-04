@@ -1,95 +1,65 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+import '@/styles/page.scss';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [site, setSite] = useState({});
+  const [menuItem, setMenuItem] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    fetch('http://localhost:1337/api/site?populate[0]=info.img')
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        setSite(data.data);
+      })
+      .finally(() => setIsLoading(true));
+  }, []);
+
+  console.log(site);
+
+  return isLoading ? (
+    <div className="diff">
+      <div className="diff__container">
+        <div className="diff__sub-title">{site.subtitle}</div>
+        <div className="diff__title">{site.title}</div>
+        <div className="diff__text">{site.text}</div>
+        <div className="diff__menu menu">
+          <div className="menu__page">
+            <div className="menu__info">
+              <div className="menu__title">{site.info[menuItem].title}</div>
+              <div className="menu__text">{site.info[menuItem].text}</div>
+            </div>
+            <div className="menu__image">
+              <Image
+                src={`/images/${site.info[menuItem].img.name}`}
+                alt="image"
+                width={0}
+                height={0}
+                sizes="100vw"
+              />
+            </div>
+          </div>
+          <div className="menu__nav">
+            <ul>
+              {site.info.map((item, index) => (
+                <li
+                  key={index}
+                  onClick={() => setMenuItem(index)}
+                  className={index === menuItem ? '_active' : ''}>
+                  <div>&lt;</div>
+                  <div>{item.title}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
+  ) : (
+    <div>Loading...</div>
   );
 }
